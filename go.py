@@ -13,8 +13,8 @@ display = Display(visible=0, size=(800, 600))
 display.start()
  
 #driver = webdriver.PhantomJS(desired_capabilities=dcap)
-#driver = webdriver.Firefox()
-driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
+driver = webdriver.Firefox()
+#driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
 
 url_googlelogin = "https://accounts.google.com/"
 driver.get(url_googlelogin)
@@ -33,7 +33,7 @@ if driver.current_url != url_login_ok:
 else:
     print "Login ok"
 
-url_console = "https://console.developers.google.com/project"
+url_console = "https://console.developers.google.com/project/"
 driver.get(url_console)
 
 project_name = "application-0001"
@@ -44,6 +44,21 @@ driver.find_element_by_id("projects-create").click()
 driver.find_element_by_name("name").send_keys(PROJECT)
 sleep(3)
 driver.find_element_by_name("ok").click()
+
+sleep(30)
+
+from urlparse import urljoin
+url_project = urljoin(url_console, PROJECT)
+url_project = url_console + PROJECT + "/apiui/consent"
+print url_project
+
+driver.get(url_project)
+sleep(3)
+
+driver.find_element_by_css_selector('div[class="goog-inline-block goog-flat-menu-button-caption"]').click()
+driver.find_element_by_class_name("goog-menuitem").click()
+driver.find_element_by_name("displayName").send_keys("application")
+driver.find_element_by_id("api-consent-save").click()
 
 driver.quit()
 display.stop()

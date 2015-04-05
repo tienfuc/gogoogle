@@ -2,9 +2,8 @@ from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-from user import USER, PASSWORD
+from user import USER, PASSWORD, PROJECT
 
-url_googlelogin = "https://accounts.google.com/"
 dcap = dict(DesiredCapabilities.PHANTOMJS)
 dcap["phantomjs.page.settings.userAgent"] = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/53 "
@@ -14,7 +13,10 @@ display = Display(visible=0, size=(800, 600))
 display.start()
  
 #driver = webdriver.PhantomJS(desired_capabilities=dcap)
-driver = webdriver.Firefox()
+#driver = webdriver.Firefox()
+driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
+
+url_googlelogin = "https://accounts.google.com/"
 driver.get(url_googlelogin)
 
 driver.find_element_by_id("Email").send_keys(USER)
@@ -34,13 +36,14 @@ else:
 url_console = "https://console.developers.google.com/project"
 driver.get(url_console)
 
-project_name = "application-001"
+project_name = "application-0001"
+from time import sleep
+
+sleep(3)
 driver.find_element_by_id("projects-create").click()
-driver.save_screenshot('out2.png')
-driver.find_element_by_name("name").send_keys(project_name)
+driver.find_element_by_name("name").send_keys(PROJECT)
+sleep(3)
 driver.find_element_by_name("ok").click()
-
-
 
 driver.quit()
 display.stop()

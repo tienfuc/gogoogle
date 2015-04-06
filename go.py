@@ -4,11 +4,10 @@ from urllib import quote_plus
 import re, os
 from time import sleep
 
-from user import USER, PASSWORD, PROJECT, FOLDER
+from user import USER, PASSWORD, PROJECT, FOLDER, VIRTUAL_DISPLAY
 
 import sys
 
-VIRTUAL_DISPLAY=0
 
 def create_project(driver):
     # wait for project creation

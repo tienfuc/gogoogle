@@ -37,7 +37,18 @@ def delay_send_keys(element, keys):
 
 url_spoof = ["notification"]
 
+def url_spoof(driver):
+    txt = "pan-nav-tooltip"
+    tooltips = driver.find_elements_by_xpath("//a[@%s]" % txt)
+
+    for i in range(1,random.randint(2,5)):
+        next_tooltip = tooltips.pop(random.choice(tooltips))
+        item = next_tooltip.find_element_by_css_selector("span[class=\"ng-binding\"]")
+        print "Spoof click: %s" % item.text
+        delay_click(itme)
+
 def delay_get(driver, url):
+    url_spoof(driver)
     delay = round(random.uniform(3, 5), 2)
     print "Delay %.2f after get(): %s" % (delay, url)
     driver.get(url)

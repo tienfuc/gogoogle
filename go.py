@@ -1,7 +1,7 @@
 from pyvirtualdisplay import Display
 from selenium import webdriver
 from urllib import quote_plus
-import re, os
+import re, os, random
 from time import sleep
 
 from user import USER, PASSWORD, PROJECT, FOLDER, VIRTUAL_DISPLAY
@@ -26,6 +26,26 @@ def create_project(driver):
         if max_retries < 0:
             raise Exception("Project creation failed: %s" % PROJECT)
 
+def delay_send_keys(element, keys):
+    for k in list(keys):
+        delay = round(random.uniform(0, 2), 2)
+        sleep(delay)
+        element.send_keys(k)
+
+def delay_get(driver, url):
+    delay = round(random.uniform(2, 6), 2)
+    print "Delay: %f" % delay
+    sleep(delay)
+    driver.get(url)
+    print driver.current_url
+
+def delay_click(element):
+    delay = round(random.uniform(1, 5), 2)
+    print "Delay: %f" % delay
+    sleep(delay)
+    element.click()
+ 
+
 def run():
     if VIRTUAL_DISPLAY:
         global display 
@@ -45,74 +65,76 @@ def run():
     url_console = "https://console.developers.google.com/project"
     url_googlelogin = "https://accounts.google.com/ServiceLogin?continue=" + quote_plus(url_console)
 
-    driver.get(url_googlelogin)
-    print driver.current_url
-    sleep(2)
+    delay_get(driver, url_googlelogin)
 
     # login
-    driver.find_element_by_id("Email").send_keys(USER)
-    driver.find_element_by_id("Passwd").send_keys(PASSWORD)                                                            
-    driver.find_element_by_id("signIn").click()    
-    sleep(8)
+    #driver.find_element_by_id("Email").send_keys(USER)
+    #driver.find_element_by_id("Passwd").send_keys(PASSWORD)                                                            
+    #driver.find_element_by_id("signIn").click()    
+    delay_send_keys(driver.find_element_by_id("Email"), USER)
+    delay_send_keys(driver.find_element_by_id("Passwd"), PASSWORD)
+    delay_click(driver.find_element_by_id("signIn"))
 
     if url_console != driver.current_url:
-        print "Login failed"
-        return
+        raise Exception("Login failed")
     else:
         print "Login ok"
 
-    projects = driver.find_elements_by_css_selector("a[class=\"p6n-clickable-link ng-binding ng-scope\"]")
-    
     try:
         print "no-projects-create"
-        driver.find_element_by_id("no-projects-create").click()
-        driver.find_element_by_css_selector("span[id=\"tos-agree\"]").click()
+        #driver.find_element_by_id("no-projects-create").click()
+        #driver.find_element_by_css_selector("span[id=\"tos-agree\"]").click()
+        delay_click(driver.find_element_by_id("no-projects-create"))
+        delay_click(driver.find_element_by_css_selector("span[id=\"tos-agree\"]"))
     except:
         pass
         try:
             print "projects-create"
-            driver.find_element_by_id("projects-create").click()
+            #driver.find_element_by_id("projects-create").click()
+            delay_click(driver.find_element_by_id("projects-create"))
         except:
             raise Exception("Both no-projects-create and projects-create failed")
 
-    driver.find_element_by_name("name").send_keys(PROJECT)
-    sleep(2)
-    driver.find_element_by_name("ok").click()
+    #driver.find_element_by_name("name").send_keys(PROJECT)
+    #driver.find_element_by_name("ok").click()
+    delay_send_keys(driver.find_element_by_name("name"), PROJECT)
+    delay_click(driver.find_element_by_name("ok"))
+
     print "Creating project: %s" % PROJECT
     new_project_name = create_project(driver)
 
     # page consent
     url_project = url_console + "/" + new_project_name + "/apiui/consent"
-    driver.get(url_project)
-    print driver.current_url
-    sleep(3)
+    delay_get(driver, url_project)
 
     # email
-    driver.find_element_by_css_selector('div[class="goog-inline-block goog-flat-menu-button-caption"]').click()
-    driver.find_element_by_class_name("goog-menuitem").click()
+    #driver.find_element_by_css_selector('div[class="goog-inline-block goog-flat-menu-button-caption"]').click()
+    #driver.find_element_by_class_name("goog-menuitem").click()
+    delay_click(driver.find_element_by_css_selector('div[class="goog-inline-block goog-flat-menu-button-caption"]'))
+    delay_click(driver.find_element_by_class_name("goog-menuitem"))
 
     # product name
-    driver.find_element_by_name("displayName").send_keys("application")
-    driver.find_element_by_id("api-consent-save").click()
-    sleep(2)
+    #driver.find_element_by_name("displayName").send_keys("application")
+    #driver.find_element_by_id("api-consent-save").click()
+    delay_send_keys(driver.find_element_by_name("displayName"), "application")
+    delay_click(driver.find_element_by_id("api-consent-save"))
 
     print "consent ok"
 
     # page credential
     url_credential = url_console + "/" + new_project_name + "/apiui/credential"
-    driver.get(url_credential)
-    print driver.current_url
-    sleep(5)
+    delay_get(driver, url_credential)
 
     # Create new Client ID
-    driver.find_element_by_css_selector('jfk-button[jfk-button-style="PRIMARY"]').click()
-    sleep(3)
+    #driver.find_element_by_css_selector('jfk-button[jfk-button-style="PRIMARY"]').click()
+    delay_click(driver.find_element_by_css_selector('jfk-button[jfk-button-style="PRIMARY"]').click())
 
     # Installed application
     txt_application = "Installed application"
     label_application = driver.find_elements_by_css_selector('label')[2]
     if txt_application in label_application.text:
-        label_application.click()
+        #label_application.click()
+        delay_click(label_application)
     else:
         raise Exception("lable not found: %s" % txt_application)
 
@@ -120,22 +142,22 @@ def run():
     txt_other = "Other"
     label_other = driver.find_elements_by_css_selector('label')[7]
     if txt_other in label_other.text:
-        label_other.click()
+        #label_other.click()
+        delay_click(label_other)
     else:
         raise Exception("lable not found: %s" % txt_other)
 
     # OK
-    driver.find_element_by_name("ok").click()
+    #driver.find_element_by_name("ok").click()
+    delay_click(driver.find_element_by_name("ok"))
 
     print "credential ok"
-
-    sleep(3)
 
     # json URL
     url_downloadjson = driver.find_element_by_css_selector('a[class="goog-inline-block jfk-button jfk-button-standard ng-scope"]').get_attribute("href")
     print "Downloading: %s" % url_downloadjson
     # get json file
-    driver.get(url_downloadjson)
+    delay_get(driver, url_downloadjson)
 
     s = re.search(r'clientId=([^&]+)', url_downloadjson, flags=re.I)
     client_id = s.group(1)

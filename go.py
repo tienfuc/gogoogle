@@ -42,12 +42,20 @@ def url_spoof(driver):
     tooltips = driver.find_elements_by_xpath("//a[@%s]" % txt)
 
     for i in range(1,random.randint(2,5)):
-        next_tooltip = tooltips.pop(random.choice(tooltips))
-        item = next_tooltip.find_element_by_css_selector("span[class=\"ng-binding\"]")
+        tooltip = random.choice(tooltips)
+        tooltips.remove(tooltip)
+        item = tooltip.find_element_by_css_selector("span[class=\"ng-binding\"]")
         print "Spoof click: %s" % item.text
-        delay_click(itme)
+        delay_click(item)
 
 def delay_get(driver, url):
+    delay = round(random.uniform(3, 5), 2)
+    print "Delay %.2f after get(): %s" % (delay, url)
+    driver.get(url)
+    sleep(delay)
+    #print driver.current_url
+
+def delay_get_spoof(driver, url):
     url_spoof(driver)
     delay = round(random.uniform(3, 5), 2)
     print "Delay %.2f after get(): %s" % (delay, url)
@@ -123,7 +131,7 @@ def run():
 
     # page consent
     url_project = url_console + "/" + new_project_id + "/apiui/consent"
-    delay_get(driver, url_project)
+    delay_get_spoof(driver, url_project)
 
     # email
     delay_click(driver.find_element_by_css_selector('div[class="goog-inline-block goog-flat-menu-button-caption"]'))
@@ -137,7 +145,7 @@ def run():
 
     # page credential
     url_credential = url_console + "/" + new_project_id + "/apiui/credential"
-    delay_get(driver, url_credential)
+    delay_get_spoof(driver, url_credential)
 
     # Create new Client ID
     delay_click(driver.find_element_by_css_selector('jfk-button[jfk-button-style="PRIMARY"]'))
@@ -167,7 +175,7 @@ def run():
     url_downloadjson = driver.find_element_by_css_selector('a[class="goog-inline-block jfk-button jfk-button-standard ng-scope"]').get_attribute("href")
     print "Downloading: %s" % url_downloadjson
     # get json file
-    delay_get(driver, url_downloadjson)
+    delay_get_spoof(driver, url_downloadjson)
 
     s = re.search(r'clientId=([^&]+)', url_downloadjson, flags=re.I)
     client_id = s.group(1)

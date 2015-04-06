@@ -8,11 +8,30 @@ from user import USER, PASSWORD, PROJECT, FOLDER
 
 import sys
 
+VIRTUAL_DISPLAY=0
+
+def create_project(driver):
+    # wait for project creation
+    max_retries = 30
+    while True:
+        sleep(1)
+        try:
+            application_name = driver.find_element_by_css_selector("b[class=\"ng-binding\"]").text
+            if application_name:
+                print "Project creation done: %s" % application_name
+                return application_name
+        except:
+            pass
+
+        max_retries -= 1
+        if max_retries < 0:
+            raise Exception("Project creation failed: %s" % PROJECT)
 
 def run():
-    global display 
-    display = Display(visible=0, size=(800, 600))
-    display.start()
+    if VIRTUAL_DISPLAY:
+        global display 
+        display = Display(visible=0, size=(800, 600))
+        display.start()
 
     # download json credential file without ask
     profile = webdriver.FirefoxProfile()
@@ -28,54 +47,45 @@ def run():
     url_googlelogin = "https://accounts.google.com/ServiceLogin?continue=" + quote_plus(url_console)
 
     driver.get(url_googlelogin)
+    print driver.current_url
     sleep(2)
 
     # login
     driver.find_element_by_id("Email").send_keys(USER)
     driver.find_element_by_id("Passwd").send_keys(PASSWORD)                                                            
     driver.find_element_by_id("signIn").click()    
-    sleep(2)
+    sleep(8)
 
     if url_console != driver.current_url:
-        raise Exception("Login failed")
+        print "Login failed"
+        return
     else:
         print "Login ok"
 
     projects = driver.find_elements_by_css_selector("a[class=\"p6n-clickable-link ng-binding ng-scope\"]")
-    for p in projects:
-        href = p.get_attribute("href")
-        print href
-        if PROJECT in href:
-            print "Project existed: %s" % PROJECT
-        else:
+    
+    try:
+        print "no-projects-create"
+        driver.find_element_by_id("no-projects-create").click()
+        driver.find_element_by_css_selector("span[id=\"tos-agree\"]").click()
+    except:
+        pass
+        try:
+            print "projects-create"
             driver.find_element_by_id("projects-create").click()
-            driver.find_element_by_name("name").send_keys(PROJECT)
-            sleep(2)
-            driver.find_element_by_name("ok").click()
-            print "Creating project: %s" % PROJECT
+        except:
+            raise Exception("Both no-projects-create and projects-create failed")
 
-            # wait for project creation
-            max_retries = 30
-            while True:
-                sleep(1)
-                try:
-                    application_name = driver.find_element_by_css_selector("b[class=\"ng-binding\"]").text
-                    print application_name
-                    print PROJECT
-                    if PROJECT == application_name:
-                        print "project creation done: %s" % PROJECT
-                        break
-                except:
-                    max_retries -= 1
-                    pass
-
-                if max_retries < 0:
-                    print "xxx"
-                    raise Exception("Project creation failed: %s" % PROJECT)
+    driver.find_element_by_name("name").send_keys(PROJECT)
+    sleep(2)
+    driver.find_element_by_name("ok").click()
+    print "Creating project: %s" % PROJECT
+    new_project_name = create_project(driver)
 
     # page consent
-    url_project = url_console + "/" + PROJECT + "/apiui/consent"
+    url_project = url_console + "/" + new_project_name + "/apiui/consent"
     driver.get(url_project)
+    print driver.current_url
     sleep(3)
 
     # email
@@ -85,12 +95,14 @@ def run():
     # product name
     driver.find_element_by_name("displayName").send_keys("application")
     driver.find_element_by_id("api-consent-save").click()
+    sleep(2)
 
     print "consent ok"
 
     # page credential
-    url_credential = url_console + "/" + PROJECT + "/apiui/credential"
+    url_credential = url_console + "/" + new_project_name + "/apiui/credential"
     driver.get(url_credential)
+    print driver.current_url
     sleep(5)
 
     # Create new Client ID
@@ -126,26 +138,31 @@ def run():
     # get json file
     driver.get(url_downloadjson)
 
-    print "Credential json file: %s" % credential_file
     s = re.search(r'clientId=([^&]+)', url_downloadjson, flags=re.I)
     client_id = s.group(1)
     credential_file = os.path.join(FOLDER, "client_secret_"+client_id+".json")
-    f = open(credential_file, 'fb')
+    f = open(credential_file, 'rb')
     if client_id in f.read():
-        print "Credential json file is valid"
+        # rename 
+        new_name = os.path.join(FOLDER, USER+"_"+new_project_name+".json")
+        if os.path.isfile(new_name):
+            os.remove(new_name)
+
+        os.rename(credential_file, new_name)
+        print "Credential json file: %s" % new_name
+
     else:
-        raise Exception("Credential json file is invalid")
+        raise Exception("Credential json file is invalid: %s" % credential_file)
 
 
 def unload():
     print "Unloading webdriver and virtualdisplay"
     driver.quit()
-    display.stop()
+    if VIRTUAL_DISPLAY:
+        display.stop()
 
 if __name__ == "__main__":
     try:
         run()
-        unload()
-    except:
-        raise
+    finally:
         unload()

@@ -1,5 +1,6 @@
 from pyvirtualdisplay import Display
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 from urllib import quote_plus
 import re, os, random
 from time import sleep
@@ -8,6 +9,7 @@ from user import USER, PASSWORD, PROJECT, FOLDER, VIRTUAL_DISPLAY
 
 import sys
 
+DEBUG = True
 
 def create_project(driver):
     # wait for project creation
@@ -27,7 +29,7 @@ def create_project(driver):
             raise Exception("Project creation failed with name: %s" % PROJECT)
 
 def delay_send_keys(element, keys):
-    delay1 = round(random.uniform(1, 2), 2)
+    delay1 = round(random.uniform(0.5, 2), 2)
     print "Delay %.2f after send_keys(): %s" % (delay1, keys)
     for k in list(keys):
         delay2 = round(random.uniform(0, 0.2), 2)
@@ -35,11 +37,32 @@ def delay_send_keys(element, keys):
         element.send_keys(k)
     sleep(delay1)
 
-url_spoof = ["notification"]
+def spoof_click(driver):
+    items = driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/div/a/span[@class=\"ng-binding\"]/..")
+    for i in items:
+        attr = i.get_attribute("pan-nav-tooltip") or i.get_attribute("title")
+        print "Spoof item: %s" % attr
+        i_span = i.find_element_by_xpath("span")
+        if not i_span.is_displayed():
+            print "go top"
+            top = i.find_element_by_xpath("../../../../../../../../dd/preceding-sibling::dt")
 
-def url_spoof(driver):
-    txt = "pan-nav-tooltip"
-    tooltips = driver.find_elements_by_xpath("//a[@%s]" % txt)
+            top.click()
+        i_span.click()
+
+    return
+
+    # cc = go.driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/div/a/span[@class=\"ng-binding\"]")
+
+    #tooltips = driver.find_elements_by_xpath("//a[@%s]" % txt)
+    tooltips = driver.find_elements_by_xpath("//a[@ng-class=\"{'p6n-layout-nav-active': $currentNode.isActive}\"]")
+    # action.move_to_element(x).click(x).perform()
+    # driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/a/span")
+    for t in tooltips:
+        text = find_elements_by_xpath("span[@class=\"ng-binding\"]")[0].text
+        if text != "":
+            t.click()
+
 
     for i in range(1,random.randint(2,5)):
         tooltip = random.choice(tooltips)
@@ -56,7 +79,7 @@ def delay_get(driver, url):
     #print driver.current_url
 
 def delay_get_spoof(driver, url):
-    url_spoof(driver)
+    #spoof_click(driver)
     delay = round(random.uniform(3, 5), 2)
     print "Delay %.2f after get(): %s" % (delay, url)
     driver.get(url)
@@ -83,7 +106,7 @@ def delay_click(element):
 def run():
     if VIRTUAL_DISPLAY:
         global display 
-        display = Display(visible=0, size=(800, 600))
+        display = Display(visible=0, size=(800, 1600))  # extend the display to make more items accessible
         display.start()
 
     # download json credential file without ask

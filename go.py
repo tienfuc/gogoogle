@@ -5,7 +5,7 @@ from urllib import quote_plus
 import re, os, random
 from time import sleep
 
-from user import USER, PASSWORD, PROJECT, FOLDER, VIRTUAL_DISPLAY
+from user import USER, PASSWORD, PROJECT, FOLDER
 
 import sys
 

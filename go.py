@@ -9,7 +9,7 @@ from user import USER, PASSWORD, PROJECT, FOLDER, VIRTUAL_DISPLAY
 
 import sys
 
-DEBUG = True
+DEBUG = False
 
 def create_project(driver):
     # wait for project creation
@@ -39,37 +39,21 @@ def delay_send_keys(element, keys):
 
 def spoof_click(driver):
     items = driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/div/a/span[@class=\"ng-binding\"]/..")
-    for i in items:
-        attr = i.get_attribute("pan-nav-tooltip") or i.get_attribute("title")
-        print "Spoof item: %s" % attr
-        i_span = i.find_element_by_xpath("span")
-        if not i_span.is_displayed():
-            print "go top"
-            top = i.find_element_by_xpath("../../../../../../../../dd/preceding-sibling::dt")
+    for item in random.sample(items, 4):
+        attr = item.get_attribute("pan-nav-tooltip") or item.get_attribute("title")
 
-            top.click()
-        i_span.click()
+        print "Spoof click: %s" % (attr)
+        span = item.find_element_by_xpath("span")
+        if not span.is_displayed():
+            top = item.find_element_by_xpath("../../../../../../../preceding-sibling::*[1]")
+            print "Spoof click top: %s" % top.text 
+            if top.is_displayed():
+                top.click()
 
+        if span.is_displayed():
+            span.click()
+    
     return
-
-    # cc = go.driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/div/a/span[@class=\"ng-binding\"]")
-
-    #tooltips = driver.find_elements_by_xpath("//a[@%s]" % txt)
-    tooltips = driver.find_elements_by_xpath("//a[@ng-class=\"{'p6n-layout-nav-active': $currentNode.isActive}\"]")
-    # action.move_to_element(x).click(x).perform()
-    # driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/a/span")
-    for t in tooltips:
-        text = find_elements_by_xpath("span[@class=\"ng-binding\"]")[0].text
-        if text != "":
-            t.click()
-
-
-    for i in range(1,random.randint(2,5)):
-        tooltip = random.choice(tooltips)
-        tooltips.remove(tooltip)
-        item = tooltip.find_element_by_css_selector("span[class=\"ng-binding\"]")
-        print "Spoof click: %s" % item.text
-        delay_click(item)
 
 def delay_get(driver, url):
     delay = round(random.uniform(3, 5), 2)
@@ -79,7 +63,7 @@ def delay_get(driver, url):
     #print driver.current_url
 
 def delay_get_spoof(driver, url):
-    #spoof_click(driver)
+    spoof_click(driver)
     delay = round(random.uniform(3, 5), 2)
     print "Delay %.2f after get(): %s" % (delay, url)
     driver.get(url)
@@ -104,7 +88,7 @@ def delay_click(element):
  
 
 def run():
-    if VIRTUAL_DISPLAY:
+    if not DEBUG:
         global display 
         display = Display(visible=0, size=(800, 1600))  # extend the display to make more items accessible
         display.start()
@@ -219,8 +203,8 @@ def run():
 
 def unload():
     print "Done: unloading webdriver and virtualdisplay"
-    driver.quit()
-    if VIRTUAL_DISPLAY:
+    if not DEBUG:
+        driver.quit()
         display.stop()
 
 if __name__ == "__main__":

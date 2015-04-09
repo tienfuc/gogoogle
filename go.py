@@ -60,7 +60,7 @@ def spoof_click(driver):
                 top.click()
 
         if span.is_displayed():
-            print "Delay %.2f after spoof click (%d of %d): %s" % (delay2, attr, count, total)
+            print "Delay %.2f after spoof click (%d of %d): %s" % (delay2, count, total, attr)
             count += 1
             sleep(delay2)
             span.click()

@@ -39,7 +39,10 @@ def delay_send_keys(element, keys):
 
 def spoof_click(driver):
     items = driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/div/a/span[@class=\"ng-binding\"]/..")
-    for item in random.sample(items, 4):
+    total = random.randint(2,6)
+    count = 1
+    for item in random.sample(items, total):
+        # FIXME: 
         attr = ""
         try:
             attr = item.get_attribute("pan-nav-tooltip") or item.get_attribute("title")
@@ -57,7 +60,8 @@ def spoof_click(driver):
                 top.click()
 
         if span.is_displayed():
-            print "Delay %.2f after spoof click: %s" % (delay2, attr)
+            print "Delay %.2f after spoof click (%d of %d): %s" % (delay2, attr, count, total)
+            count += 1
             sleep(delay2)
             span.click()
     

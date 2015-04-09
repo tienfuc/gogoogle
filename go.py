@@ -42,15 +42,19 @@ def spoof_click(driver):
     for item in random.sample(items, 4):
         attr = item.get_attribute("pan-nav-tooltip") or item.get_attribute("title")
 
-        print "Spoof click: %s" % (attr)
+        delay1 = round(random.uniform(0.3, 1), 2)
+        delay2 = round(random.uniform(0.3, 1), 2)
         span = item.find_element_by_xpath("span")
         if not span.is_displayed():
             top = item.find_element_by_xpath("../../../../../../../preceding-sibling::*[1]")
-            print "Spoof click top: %s" % top.text 
+            print "Delay %.2f after spoof top click: %s" % (delay1, top.text)
             if top.is_displayed():
+                sleep(delay1)
                 top.click()
 
         if span.is_displayed():
+            print "Delay %.2f after spoof click: %s" % (delay2, attr)
+            sleep(delay2)
             span.click()
     
     return

@@ -29,7 +29,7 @@ def create_project(driver):
             raise Exception("Project creation failed with name: %s" % PROJECT)
 
 def delay_send_keys(element, keys):
-    delay1 = round(random.uniform(0.5, 2), 2)
+    delay1 = round(random.uniform(1, 2), 2)
     print "Delay %.2f after send_keys(): %s" % (delay1, keys)
     for k in list(keys):
         delay2 = round(random.uniform(0, 0.2), 2)
@@ -60,7 +60,6 @@ def delay_get(driver, url):
     print "Delay %.2f after get(): %s" % (delay, url)
     driver.get(url)
     sleep(delay)
-    #print driver.current_url
 
 def delay_get_spoof(driver, url):
     spoof_click(driver)
@@ -68,7 +67,6 @@ def delay_get_spoof(driver, url):
     print "Delay %.2f after get(): %s" % (delay, url)
     driver.get(url)
     sleep(delay)
-    #print driver.current_url
 
 def delay_click(element):
     delay1 = round(random.uniform(1.5, 1), 2)
@@ -180,7 +178,7 @@ def run():
 
     # json URL
     url_downloadjson = driver.find_element_by_css_selector('a[class="goog-inline-block jfk-button jfk-button-standard ng-scope"]').get_attribute("href")
-    print "Downloading: %s" % url_downloadjson
+    print "URL to credential json: %s" % url_downloadjson
     # get json file
     delay_get_spoof(driver, url_downloadjson)
 

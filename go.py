@@ -40,7 +40,11 @@ def delay_send_keys(element, keys):
 def spoof_click(driver):
     items = driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/div/a/span[@class=\"ng-binding\"]/..")
     for item in random.sample(items, 4):
-        attr = item.get_attribute("pan-nav-tooltip") or item.get_attribute("title")
+        attr = ""
+        try:
+            attr = item.get_attribute("pan-nav-tooltip") or item.get_attribute("title")
+        except:
+            pass
 
         delay1 = round(random.uniform(0.3, 1), 2)
         delay2 = round(random.uniform(0.3, 1), 2)

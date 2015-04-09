@@ -190,7 +190,7 @@ def run():
 
     # json URL
     url_downloadjson = driver.find_element_by_css_selector('a[class="goog-inline-block jfk-button jfk-button-standard ng-scope"]').get_attribute("href")
-    print "URL to credential json: %s" % url_downloadjson
+
     # get json file
     delay_get_spoof(driver, url_downloadjson)
 

@@ -11,6 +11,7 @@ import sys
 
 DEBUG = False
 
+
 def create_project(driver):
     # wait for project creation
     max_retries = 30
@@ -28,6 +29,7 @@ def create_project(driver):
         if max_retries < 0:
             raise Exception("Project creation failed with name: %s" % PROJECT)
 
+
 def delay_send_keys(element, keys):
     delay1 = round(random.uniform(1, 2), 2)
     print "Delay %.2f after send_keys(): %s" % (delay1, keys)
@@ -36,6 +38,7 @@ def delay_send_keys(element, keys):
         sleep(delay2)
         element.send_keys(k)
     sleep(delay1)
+
 
 def spoof_click(driver):
     items = driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/div/a/span[@class=\"ng-binding\"]/..")
@@ -48,24 +51,29 @@ def spoof_click(driver):
             attr = item.get_attribute("pan-nav-tooltip") or item.get_attribute("title")
         except:
             pass
+        else:
+            delay1 = round(random.uniform(0.3, 1), 2)
+            delay2 = round(random.uniform(0.3, 1), 2)
+            try:
+                span = item.find_element_by_xpath("span")
+            except:
+                pass
+            else:
+                if not span.is_displayed():
+                    top = item.find_element_by_xpath("../../../../../../../preceding-sibling::*[1]")
+                    print "Delay %.2f after spoof top click: %s" % (delay1, top.text)
+                    if top.is_displayed():
+                        sleep(delay1)
+                        top.click()
 
-        delay1 = round(random.uniform(0.3, 1), 2)
-        delay2 = round(random.uniform(0.3, 1), 2)
-        span = item.find_element_by_xpath("span")
-        if not span.is_displayed():
-            top = item.find_element_by_xpath("../../../../../../../preceding-sibling::*[1]")
-            print "Delay %.2f after spoof top click: %s" % (delay1, top.text)
-            if top.is_displayed():
-                sleep(delay1)
-                top.click()
-
-        if span.is_displayed():
-            print "Delay %.2f after spoof click (%d of %d): %s" % (delay2, count, total, attr)
-            count += 1
-            sleep(delay2)
-            span.click()
-    
+                if span.is_displayed():
+                    print "Delay %.2f after spoof click (%d of %d): %s" % (delay2, count, total, attr)
+                    count += 1
+                    sleep(delay2)
+                    span.click()
+            
     return
+
 
 def delay_get(driver, url):
     delay = round(random.uniform(3, 5), 2)
@@ -73,12 +81,14 @@ def delay_get(driver, url):
     driver.get(url)
     sleep(delay)
 
+
 def delay_get_spoof(driver, url):
     spoof_click(driver)
     delay = round(random.uniform(3, 5), 2)
     print "Delay %.2f after get(): %s" % (delay, url)
     driver.get(url)
     sleep(delay)
+
 
 def delay_click(element):
     delay1 = round(random.uniform(1.5, 1), 2)
@@ -112,6 +122,7 @@ def run():
 
     global driver
     driver = webdriver.Firefox(profile)
+    driver.manage().window().maximize() 
 
     url_console = "https://console.developers.google.com/project"
     url_googlelogin = "https://accounts.google.com/ServiceLogin?continue=" + quote_plus(url_console)
@@ -220,5 +231,7 @@ def unload():
 if __name__ == "__main__":
     try:
         run()
+        sys.exit(0)
     finally:
         unload()
+        sys.exit(1)

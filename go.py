@@ -9,7 +9,7 @@ from user import USER, PASSWORD, PROJECT, FOLDER
 
 import sys
 
-DEBUG = False
+DEBUG = True
 
 
 def create_project(driver):
@@ -163,7 +163,7 @@ def run():
 
     #delay_click(driver.find_element_by_css_selector("span[id=\"tos-agree\"]"))
     try:
-        agree = find_element_by_css_selector("span[id=\"tos-agree\"]")
+        agree = driver.find_element_by_css_selector("span[id=\"tos-agree\"]")
     except:
         pass
     else:
@@ -252,10 +252,9 @@ if __name__ == "__main__":
         result = run()
     except:
         result = 1   
-        driver.get_screenshot_as_file("/tmp/driver.png")
-        with open("/tmp/driver.log", "wb") as f:
-            for l in ["driver", "client", "browser", "server"]:
-                f.write(driver.get_log(l))
+        driver.get_screenshot_as_file("/tmp/webdriver_screenshot.png")
+        with open("/tmp/webdriver_source.html", "wb") as f:
+            f.write(driver.page_source)
         raise
     finally:
         unload()

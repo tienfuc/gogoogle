@@ -45,11 +45,11 @@ def spoof_click(driver):
     total = random.randint(2,6)
     count = 1
     for item in random.sample(items, total):
-        # FIXME: 
         attr = ""
         try:
             attr = item.get_attribute("pan-nav-tooltip") or item.get_attribute("title")
         except:
+            print "Error: failed to get pan-nav-tooltip or title"
             pass
         else:
             delay1 = round(random.uniform(0.3, 1), 2)
@@ -57,20 +57,29 @@ def spoof_click(driver):
             try:
                 span = item.find_element_by_xpath("span")
             except:
+                print "Error: failed to get span"
                 pass
             else:
                 if not span.is_displayed():
-                    top = item.find_element_by_xpath("../../../../../../../preceding-sibling::*[1]")
-                    print "Delay %.2f after spoof top click: %s" % (delay1, top.text)
-                    if top.is_displayed():
-                        sleep(delay1)
-                        top.click()
+                    try:
+                        top = item.find_element_by_xpath("../../../../../../../preceding-sibling::*[1]")
+                        print "Delay %.2f after spoof top click: %s" % (delay1, top.text)
+                        if top.is_displayed():
+                            sleep(delay1)
+                            top.click()
+                    except:
+                        print "Error: failed to find preceding-sibling and click"
+                        pass
 
                 if span.is_displayed():
                     print "Delay %.2f after spoof click (%d of %d): %s" % (delay2, count, total, attr)
                     count += 1
                     sleep(delay2)
-                    span.click()
+                    try:
+                        span.click()
+                    except:
+                        print "Error: failed to click span"
+                        pass
             
     return
 
@@ -122,7 +131,7 @@ def run():
 
     global driver
     driver = webdriver.Firefox(profile)
-    driver.manage().window().maximize() 
+    driver.maximize_window()
 
     url_console = "https://console.developers.google.com/project"
     url_googlelogin = "https://accounts.google.com/ServiceLogin?continue=" + quote_plus(url_console)
@@ -221,6 +230,7 @@ def run():
     else:
         raise Exception("Error: credential file invalid: %s" % credential_file)
 
+    return 0
 
 def unload():
     print "Done: unloading webdriver and virtualdisplay"
@@ -229,9 +239,12 @@ def unload():
         display.stop()
 
 if __name__ == "__main__":
+    result = 1
     try:
-        run()
-        sys.exit(0)
+        result = run()
+    except:
+        result = 1   
     finally:
         unload()
-        sys.exit(1)
+        sys.exit(result)
+

@@ -41,46 +41,48 @@ def delay_send_keys(element, keys):
 
 
 def spoof_click(driver):
-    items = driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/div/a/span[@class=\"ng-binding\"]/..")
     total = random.randint(2,6)
     count = 1
-    for item in random.sample(items, total):
-        attr = ""
-        try:
-            attr = item.get_attribute("pan-nav-tooltip") or item.get_attribute("title")
-        except:
-            print "Error: failed to get pan-nav-tooltip or title"
-            pass
-        else:
-            delay1 = round(random.uniform(0.3, 1), 2)
-            delay2 = round(random.uniform(0.3, 1), 2)
-            try:
-                span = item.find_element_by_xpath("span")
-            except:
-                print "Error: failed to get span"
-                pass
-            else:
-                if not span.is_displayed():
-                    try:
-                        top = item.find_element_by_xpath("../../../../../../../preceding-sibling::*[1]")
-                        print "Delay %.2f after spoof top click: %s" % (delay1, top.text)
-                        if top.is_displayed():
-                            sleep(delay1)
-                            top.click()
-                    except:
-                        print "Error: failed to find preceding-sibling and click"
-                        pass
 
-                if span.is_displayed():
-                    print "Delay %.2f after spoof click (%d of %d): %s" % (delay2, count, total, attr)
-                    count += 1
-                    sleep(delay2)
-                    try:
-                        span.click()
-                    except:
-                        print "Error: failed to click span"
-                        pass
-            
+    for i in range(0, total):
+        items = driver.find_elements_by_xpath("//dt[contains(@class, \"p6n-tree-node ng-scope ng-isolate-scope\")]/div/div/div/a/span[@class=\"ng-binding\"]/..")
+        for item in random.sample(items, 1):
+            attr = ""
+            try:
+                attr = item.get_attribute("pan-nav-tooltip") or item.get_attribute("title")
+            except:
+                 print "Error: failed to get pan-nav-tooltip or title"
+                 pass
+            else:
+                delay1 = round(random.uniform(0.3, 1), 2)
+                delay2 = round(random.uniform(0.3, 1), 2)
+                try: 
+                    span = item.find_element_by_xpath("span")
+                except:
+                    print "Error: failed to get span"
+                    pass
+                else:
+                    if not span.is_displayed():
+                        try:
+                            top = item.find_element_by_xpath("../../../../../../../preceding-sibling::*[1]")
+                            print "Delay %.2f after spoof top click: %s" % (delay1, top.text)
+                            if top.is_displayed():
+                                sleep(delay1)
+                                top.click()
+                        except:
+                            print "Error: failed to find preceding-sibling and click"
+                            pass
+
+                    if span.is_displayed():
+                        print "Delay %.2f after spoof click (%d of %d): %s" % (delay2, count, total, attr)
+                        count += 1
+                        sleep(delay2)
+                        try:
+                            span.click()
+                        except:
+                            print "Error: failed to click span"
+                            pass
+                    
     return
 
 
@@ -151,7 +153,6 @@ def run():
     try:
         print "Trying: no-projects-create"
         delay_click(driver.find_element_by_id("no-projects-create"))
-        delay_click(driver.find_element_by_css_selector("span[id=\"tos-agree\"]"))
     except:
         pass
         try:
@@ -159,6 +160,14 @@ def run():
             delay_click(driver.find_element_by_id("projects-create"))
         except:
             raise Exception("Both no-projects-create and projects-create failed")
+
+    #delay_click(driver.find_element_by_css_selector("span[id=\"tos-agree\"]"))
+    try:
+        agree = find_element_by_css_selector("span[id=\"tos-agree\"]")
+    except:
+        pass
+    else:
+        delay_click(agree)
 
     delay_send_keys(driver.find_element_by_name("name"), PROJECT)
     delay_click(driver.find_element_by_name("ok"))
@@ -220,7 +229,7 @@ def run():
     f = open(credential_file, 'rb')
     if client_id in f.read():
         # rename 
-        new_name = os.path.join(FOLDER, USER+"_"+new_project_id+".json")
+        new_name = os.path.join(FOLDER, USER+"="+new_project_id+".json")
         if os.path.isfile(new_name):
             os.remove(new_name)
 
@@ -239,12 +248,16 @@ def unload():
         display.stop()
 
 if __name__ == "__main__":
-    result = 1
     try:
         result = run()
     except:
         result = 1   
+        driver.get_screenshot_as_file("/tmp/driver.png")
+        with open("/tmp/driver.log", "wb") as f:
+            for l in ["driver", "client", "browser", "server"]:
+                f.write(driver.get_log(l))
+        raise
     finally:
         unload()
-        sys.exit(result)
-
+    
+    sys.exit(result)

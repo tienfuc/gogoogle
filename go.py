@@ -276,6 +276,7 @@ def run():
     else:
         raise Exception("Error: credential file invalid: %s" % credential_file)
 
+    # enable APIs
     apis = ["drive", "fusiontables"]
     enable_api(driver, new_project_id, apis)
 

@@ -121,7 +121,7 @@ def delay_click(element):
 def run():
     if not DEBUG:
         global display 
-        display = Display(visible=0, size=(800, 1600))  # extend the display to make more items accessible
+        display = Display(visible=0, size=(800, 3200))  # extend the display to make more items accessible
         display.start()
 
     # download json credential file without ask
@@ -254,7 +254,7 @@ if __name__ == "__main__":
         result = 1   
         driver.get_screenshot_as_file("/tmp/webdriver_screenshot.png")
         with open("/tmp/webdriver_source.html", "wb") as f:
-            f.write(driver.page_source)
+            f.write(driver.page_source.encode('utf-8')
         raise
     finally:
         unload()

@@ -5,11 +5,10 @@ from urllib import quote_plus
 import re, os, random
 from time import sleep
 
-from user import USER, PASSWORD, PROJECT, FOLDER
+from user import USER, PASSWORD, PROJECT, FOLDER, DEBUG
 
 import sys
 
-DEBUG = False
 
 
 def create_project(driver):
@@ -117,6 +116,16 @@ def delay_click(element):
     element.click()
     sleep(delay2)
  
+
+def enable_api(driver, project_id, api):
+    base_url = "https://console.developers.google.com/project/%s/apiui/apiview/%s/overview"
+    for a in api:
+        url = base_url % (project_id, a)
+        delay_get_spoof(driver, url)
+        span = driver.find_element_by_xpath("//span[@class=\"p6n-loading-button-regular-text\"]")
+        print "Enable API: %s" % a
+        span.click()
+
 
 def run():
     if not DEBUG:
@@ -238,6 +247,9 @@ def run():
 
     else:
         raise Exception("Error: credential file invalid: %s" % credential_file)
+
+    apis = ["drive", "fusiontables"]
+    enable_api(driver, new_project_id, apis)
 
     return 0
 

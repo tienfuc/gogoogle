@@ -9,7 +9,7 @@ from user import USER, PASSWORD, PROJECT, FOLDER
 
 import sys
 
-DEBUG = True
+DEBUG = False
 
 
 def create_project(driver):
@@ -254,7 +254,7 @@ if __name__ == "__main__":
         result = 1   
         driver.get_screenshot_as_file("/tmp/webdriver_screenshot.png")
         with open("/tmp/webdriver_source.html", "wb") as f:
-            f.write(driver.page_source.encode('utf-8')
+            f.write(driver.page_source.encode('utf-8'))
         raise
     finally:
         unload()

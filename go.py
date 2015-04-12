@@ -5,7 +5,7 @@ from urllib import quote_plus
 import re, os, random
 from time import sleep
 
-from user import USER, PASSWORD, PROJECT, FOLDER, DEBUG
+from user import USER, PASSWORD, PROJECT, FOLDER, DEBUG, PHONE_NUMBER
 
 import sys
 
@@ -127,6 +127,23 @@ def enable_api(driver, project_id, api):
         span.click()
 
 
+def pass_phone_check1(driver):
+    # radio 
+    print "pass_phone_check1"
+    radio = driver.find_element_by_xpath("//input[@id=\"PhoneVerificationChallenge\"]")
+    radio.click()
+    phone_number = driver.find_element_by_xpath("//input[@id=\"phoneNumber\"]")
+    phone_number.send_keys(PHONE_NUMBER)
+    submit = driver.find_element_by_xpath("//input[@id=\"submitChallenge\"]")
+    submit.click()
+
+
+def pass_phone_check2(driver):
+    print "pass_phone_check2"
+    submit = driver.find_element_by_xpath("//input[@id=\"save\"]")
+    submit.click()
+
+
 def run():
     if not DEBUG:
         global display 
@@ -153,6 +170,17 @@ def run():
     delay_send_keys(driver.find_element_by_id("Email"), USER)
     delay_send_keys(driver.find_element_by_id("Passwd"), PASSWORD)
     delay_click(driver.find_element_by_id("signIn"))
+
+    # phone number check
+    try:
+        pass_phone_check1(driver)
+    except:
+        pass
+
+    try:
+        pass_phone_check2(driver)
+    except:
+        pass
 
     if url_console != driver.current_url:
         raise Exception("Login failed")
